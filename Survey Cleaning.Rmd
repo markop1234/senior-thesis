@@ -1,0 +1,324 @@
+---
+title: "Survey Cleaning"
+output: html_notebook
+---
+
+This notebook is designed to prepare the survey data and collect demographics.
+
+1: Load the data & packages
+```{r}
+library(tidyverse)
+library(table1)
+library(gtsummary)
+library(extrafont)
+font_import()
+
+survey <- read.csv("/Volumes/Terry/Thesis Data/Chapter 4 Data/survey.csv")
+```
+
+2: Filter incomplete data
+```{r}
+### 383 people began a survey
+
+survey <- survey %>%
+  filter(Finished == "True")
+
+### 353 people finished the survey. 93.81% completion rate
+```
+
+3: Select variables of interest & rename variables
+```{r}
+### Select the variables needed
+survey <- survey %>%
+  select(ResponseId, Q9, Q11, Q12, Q13, Q14, Q15, Q16, Q17, Q18, Q19, Q20, Q21, 
+         Q22, Q23, Q24, Q25, Q27, Q28, Q29, Q30, Q32, Q33, Q34, Q36, Q36_10_TEXT,
+         Q37, Q37_6_TEXT, Q38, Q39, Q39_7_TEXT, Q40, Q41, Q42, Q43, Q44, Q45,
+         Q46, Q46_4_TEXT, Q47_1)
+
+### Rename the variables
+survey <- survey %>%
+  rename(Knowledge_Check = Q9, EP_1 = Q11, EP_2 = Q12, EP_3 = Q13, EP_4 = Q14,
+    EP_5 = Q15, SP_1 = Q16, SP_2 = Q17, SP_3 = Q18, SP_4 = Q19, SP_5 = Q20,
+    GP_1 = Q21, GP_2 = Q22, GP_3 = Q23, GP_4 = Q24, GP_5 = Q25, EPF = Q27,
+    SPF = Q28, Attention_Check = Q29, GPF = Q30, EP_Barriers = Q32,
+    SP_Barriers = Q33, GP_Barriers = Q34, Industry = Q36, 
+    Industry_Text = Q36_10_TEXT, Size = Q37, Size_Text = Q37_6_TEXT,
+    Employees = Q38, Role = Q39, Role_Text = Q39_7_TEXT, Years = Q40,
+    Education = Q41, Income = Q42, Age = Q43, Ethnicity = Q44, Race = Q45,
+    Gender = Q46, Gender_Text = Q46_4_TEXT, Political_Identity = Q47_1)
+```
+
+4: Attention Check & Knowledge Check
+```{r}
+### 318 observations 
+
+### 3 participants failed the knowledge check. 99.06% passed the check
+summary(as.factor(survey$Knowledge_Check))
+
+### 3 participants failed the attention check. 99.06% passed the check 
+summary(as.factor(survey$Attention_Check))
+
+survey <- survey%>%
+  filter(Knowledge_Check == "Environmental") %>%
+  filter(Attention_Check == "Somewhat agree")
+
+### Final amount is 347
+```
+
+5: Check each demographic variable
+```{r}
+### Industry
+summary(as.factor(survey$Industry))
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents)."] <- "Air Freight & Logistics"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Airport Services — Operators of airports and companies providing related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Airport Services — Operators of airports and companies providing related services.,Highways & Railroad Infrastructure — Owners and operators of roads, tunnels, and railtracks."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Highways & Railroad Infrastructure — Owners and operators of roads, tunnels, and railtracks.,Marine Ports & Services — Owners and operators of marine ports and related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Other (please describe)"] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Passenger Ground Transportation — Companies providing passenger ground transportation and related services, including bus, taxi, vehicle rental, ride sharing and on-demand ride sharing platforms, and other passenger logistics."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking)."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Highways & Railroad Infrastructure — Owners and operators of roads, tunnels, and railtracks."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Marine Transportation — Companies providing goods or passenger maritime transportation.,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking)."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Marine Transportation — Companies providing goods or passenger maritime transportation.,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Highways & Railroad Infrastructure — Owners and operators of roads, tunnels, and railtracks."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Marine Transportation — Companies providing goods or passenger maritime transportation.,Marine Ports & Services — Owners and operators of marine ports and related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Marine Transportation — Companies providing goods or passenger maritime transportation.,Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking)."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Marine Transportation — Companies providing goods or passenger maritime transportation.,Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Airport Services — Operators of airports and companies providing related services.,Marine Ports & Services — Owners and operators of marine ports and related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Marine Transportation — Companies providing goods or passenger maritime transportation.,Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Highways & Railroad Infrastructure — Owners and operators of roads, tunnels, and railtracks."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Marine Transportation — Companies providing goods or passenger maritime transportation.,Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Highways & Railroad Infrastructure — Owners and operators of roads, tunnels, and railtracks.,Marine Ports & Services — Owners and operators of marine ports and related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Other (please describe)"] <- "Air Freight & Logistics"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Passenger Airlines — Companies providing primarily passenger air transportation."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Passenger Airlines — Companies providing primarily passenger air transportation.,Airport Services — Operators of airports and companies providing related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Passenger Airlines — Companies providing primarily passenger air transportation.,Airport Services — Operators of airports and companies providing related services.,Marine Ports & Services — Owners and operators of marine ports and related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Passenger Airlines — Companies providing primarily passenger air transportation.,Airport Services — Operators of airports and companies providing related services.,Other (please describe)"] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Passenger Ground Transportation — Companies providing passenger ground transportation and related services, including bus, taxi, vehicle rental, ride sharing and on-demand ride sharing platforms, and other passenger logistics."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking)."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Airport Services — Operators of airports and companies providing related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Marine Ports & Services — Owners and operators of marine ports and related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Air Freight & Logistics — Companies providing air freight transportation, courier, and logistics services (including package and mail delivery and customs agents).,Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Highways & Railroad Infrastructure — Owners and operators of roads, tunnels, and railtracks."] <- "More than one industry"
+survey$Industry[survey$Industry == "Airport Services — Operators of airports and companies providing related services."] <- "Transportation Infrastructure"
+survey$Industry[survey$Industry == "Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking)."] <- "Ground Transportation"
+survey$Industry[survey$Industry == "Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Other (please describe)"] <- "Ground Transportation"
+survey$Industry[survey$Industry == "Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Passenger Ground Transportation — Companies providing passenger ground transportation and related services, including bus, taxi, vehicle rental, ride sharing and on-demand ride sharing platforms, and other passenger logistics."] <- "Ground Transportation"
+survey$Industry[survey$Industry == "Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Passenger Ground Transportation — Companies providing passenger ground transportation and related services, including bus, taxi, vehicle rental, ride sharing and on-demand ride sharing platforms, and other passenger logistics.,Airport Services — Operators of airports and companies providing related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Highways & Railroad Infrastructure — Owners and operators of roads, tunnels, and railtracks."] <- "Transportation Infrastructure"
+survey$Industry[survey$Industry == "Marine Ports & Services — Owners and operators of marine ports and related services."] <- "Transportation Infrastructure"
+survey$Industry[survey$Industry == "Marine Transportation — Companies providing goods or passenger maritime transportation."] <- "Marine Transportation"
+survey$Industry[survey$Industry == "Marine Transportation — Companies providing goods or passenger maritime transportation.,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Marine Ports & Services — Owners and operators of marine ports and related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Marine Transportation — Companies providing goods or passenger maritime transportation.,Marine Ports & Services — Owners and operators of marine ports and related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Marine Transportation — Companies providing goods or passenger maritime transportation.,Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Highways & Railroad Infrastructure — Owners and operators of roads, tunnels, and railtracks.,Marine Ports & Services — Owners and operators of marine ports and related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Passenger Airlines — Companies providing primarily passenger air transportation."] <- "Passenger Airlines"
+survey$Industry[survey$Industry == "Passenger Airlines — Companies providing primarily passenger air transportation.,Airport Services — Operators of airports and companies providing related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Passenger Airlines — Companies providing primarily passenger air transportation.,Marine Ports & Services — Owners and operators of marine ports and related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Passenger Airlines — Companies providing primarily passenger air transportation.,Passenger Ground Transportation — Companies providing passenger ground transportation and related services, including bus, taxi, vehicle rental, ride sharing and on-demand ride sharing platforms, and other passenger logistics."] <- "More than one industry"
+survey$Industry[survey$Industry == "Passenger Ground Transportation — Companies providing passenger ground transportation and related services, including bus, taxi, vehicle rental, ride sharing and on-demand ride sharing platforms, and other passenger logistics."] <- "Ground Transportation"
+survey$Industry[survey$Industry == "Passenger Ground Transportation — Companies providing passenger ground transportation and related services, including bus, taxi, vehicle rental, ride sharing and on-demand ride sharing platforms, and other passenger logistics.,Highways & Railroad Infrastructure — Owners and operators of roads, tunnels, and railtracks."] <- "More than one industry"
+survey$Industry[survey$Industry == "Passenger Ground Transportation — Companies providing passenger ground transportation and related services, including bus, taxi, vehicle rental, ride sharing and on-demand ride sharing platforms, and other passenger logistics.,Other (please describe)"] <- "Ground Transportation"
+survey$Industry[survey$Industry == "Rail Transportation — Companies providing primarily goods and passenger rail transportation."] <- "Ground Transportation"
+survey$Industry[survey$Industry == "Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Airport Services — Operators of airports and companies providing related services.,Highways & Railroad Infrastructure — Owners and operators of roads, tunnels, and railtracks.,Marine Ports & Services — Owners and operators of marine ports and related services."] <- "More than one industry"
+survey$Industry[survey$Industry == "Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking)."] <- "Ground Transportation"
+survey$Industry[survey$Industry == "Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Airport Services — Operators of airports and companies providing related services."] <- "Ground Transportation"
+survey$Industry[survey$Industry == "Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Cargo Ground Transportation — Companies providing ground transportation services for goods and freight (including freight trucking).,Passenger Ground Transportation — Companies providing passenger ground transportation and related services, including bus, taxi, vehicle rental, ride sharing and on-demand ride sharing platforms, and other passenger logistics."] <- "Ground Transportation"
+survey$Industry[survey$Industry == "Rail Transportation — Companies providing primarily goods and passenger rail transportation.,Highways & Railroad Infrastructure — Owners and operators of roads, tunnels, and railtracks."] <- "More than one industry"
+
+summary(as.factor(survey$Industry_Text))
+survey$Industry[survey$Industry_Text == "Car service programming "] <- "Industry Infrastructure"
+survey$Industry[survey$Industry_Text == "Control Systems Company. HVAC, Fire Protection, Security Systems, Etc."] <- "Industry Infrastructure"
+survey$Industry[survey$Industry_Text == "Delivery"] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "Federal aviation administration "] <- "Passenger Airlines"
+survey$Industry[survey$Industry_Text == "Food Distribution Service. Transporting food and products to local companies. "] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "fuel transport"] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "Hearse/dead body transportation "] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "hospital distribution"] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "Industrial and residential waste removal"] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "Junk removal"] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "LTL services"] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "Non Emergency Medical Transportation"] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "On-demand food delivery"] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "Parts sales and deliveries "] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "Private school transportation department"] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "ship brokers"] <- "Marine Transportation"
+survey$Industry[survey$Industry_Text == "Towing and transport"] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "Vending delivery"] <- "Ground Transportation"
+survey$Industry[survey$Industry_Text == "waste management and transportation"] <- "Ground Transportation"
+
+summary(as.factor(survey$Industry))
+### Size
+summary(as.factor(survey$Size_Text))
+survey$Size[survey$Size_Text == "federally founded transportation "] <- "State-Owned Enterprise"
+survey$Size[survey$Size_Text == "Government"] <- "State-Owned Enterprise"
+survey$Size[survey$Size_Text == "Government agency"] <- "State-Owned Enterprise"
+survey$Size[survey$Size_Text == "Local government"] <- "State-Owned Enterprise"
+survey$Size[survey$Size_Text == "Postal Service"] <- "State-Owned Enterprise"
+survey$Size[survey$Size_Text == "Public Benefit Corporation"] <- "State-Owned Enterprise"
+survey$Size[survey$Size_Text == "State Government"] <- "State-Owned Enterprise"
+survey$Size[survey$Size_Text == "The transportation department is only a small portion of a private school"] <- "State-Owned Enterprise"
+survey$Size[survey$Size_Text == "Not sure "] <- "Unknown"
+survey$Size[survey$Size_Text == "special district "] <- "State-Owned Enterprise"
+survey$Size[survey$Size_Text == "Na"] <- "Unknown"
+
+# Check to see if any 'other' appear
+summary(as.factor(survey$Size))
+
+# Turn size into a factor variable
+survey <- survey %>% 
+          mutate(Size = factor(Size, levels =  c("Sole Proprietorship or Freelancer","Micro Private Enterprise", "Small-Medium Private Enterprise", "Large Private Enterprise", "Publicly Traded Corporation", "State-Owned Enterprise")))
+levels(survey$Size)
+
+### Employees
+summary(as.factor(survey$Employees))
+survey <- survey %>% 
+          mutate(Employees = factor(Employees, levels =  c("1 to 4 employees", "5 to 9 employees","10 to 19 employees", "20 to 49 employees", "50 to 99 employees", "100 to 249 employees", "250 to 499 employees", "500 to 999 employees", "1,000 or more employees")))
+
+### Role
+summary(as.factor(survey$Role_Text))
+survey$Role[survey$Role_Text == "Contract"] <- "Individual Contributor"
+survey$Role[survey$Role_Text == "Lead driver (driver with some management responsibilities)"] <- "Director or Manager"
+survey$Role[survey$Role_Text == "supervisor"] <- "Director or Manager"
+survey$Role[survey$Role_Text == "supervisor "] <- "Director or Manager"
+survey$Role[survey$Role_Text == "Supervisor"] <- "Director or Manager"
+survey$Role[survey$Role_Text == "Lead Consultant "] <- "Director or Manager"
+survey$Role[survey$Role_Text == "Employee"] <- "Employee not on management track"
+survey$Role[survey$Role_Text == "Manage one employee in my very small department"] <- "Director or Manager"
+summary(as.factor(survey$Role))
+survey <- survey %>% 
+          mutate(Role = factor(Role, levels =  c("Employee not on management track", "Individual Contributor","Director or Manager", "Head of department SVP or VP", "Direct report to CEO or direct report to senior leader", "CEO or senior leader")))
+
+### Years
+summary(as.factor(survey$Years))
+survey <- survey %>% 
+          mutate(Years = factor(Years, levels =  c("less than 1 year", "1-2 years","3-5 years", "5-10 years", "10-20 years", "Over 20 years")))
+
+### Education
+summary(as.factor(survey$Education))
+survey <- survey %>% 
+          mutate(Education = factor(Education, levels =  c("Some high school or less", "High school diploma or GED","Some college, but no degree", "Associates or technical degree", "Bachelor’s degree", "Graduate or professional degree (MA, MS, MBA, PhD, JD, MD, DDS etc.)")))
+
+### Income
+summary(as.factor(survey$Income))
+survey <- survey %>% 
+          mutate(Income = factor(Income, levels =  c("Less than $25,000","$25,000-$49,999", "$50,000-$74,999", "$75,000-$99,999", "$100,000-$149,999", "$150,000 or more")))
+
+### Age
+summary(as.factor(survey$Age))
+survey <- survey %>% 
+          mutate(Age = factor(Age, levels =  c("18-24 years old", "25-34 years old","35-44 years old", "45-54 years old", "55-64 years old", "65 and older")))
+
+### Ethnicity
+summary(as.factor(survey$Ethnicity))
+
+### Race
+summary(as.factor(survey$Race))
+survey$Race[survey$Race == "Asian,Native Hawaiian or Other Pacific Islander"] <- "More than one race"
+survey$Race[survey$Race == "Black or African American,Native Hawaiian or Other Pacific Islander"] <- "More than one race"
+survey$Race[survey$Race == "White or Caucasian,American Indian/Native American or Alaska Native"] <- "More than one race"
+survey$Race[survey$Race == "White or Caucasian,Asian"] <- "More than one race"
+survey$Race[survey$Race == "White or Caucasian,Asian,Native Hawaiian or Other Pacific Islander"] <- "More than one race"
+survey$Race[survey$Race == "White or Caucasian,Black or African American"] <- "More than one race"
+survey$Race[survey$Race == "White or Caucasian,Black or African American,American Indian/Native American or Alaska Native"] <- "More than one race"
+survey$Race[survey$Race == "White or Caucasian,Native Hawaiian or Other Pacific Islander"] <- "More than one race"
+
+survey <- survey %>% 
+          mutate(Race = factor(Race, levels =  c("American Indian/Native American or Alaska Native", "Asian", "Black or African American", "Native Hawaiian or Other Pacific Islander", "White or Caucasian", "More than one race", "Other", "Prefer not to say")))
+
+### Gender
+summary(as.factor(survey$Gender))
+summary(as.factor(survey$Gender_Text))
+survey$Gender[survey$Gender_Text == "30"] <- "Non-binary / third gender"
+
+survey <- survey %>% 
+          mutate(Gender = factor(Gender, levels =  c("Non-binary / third gender", "Male", "Female")))
+
+### Political Identity
+survey$Political_Identity <- as.numeric(survey$Political_Identity)
+```
+
+6: Demographic Table
+```{r}
+table1(~ Size + Employees + Role + Years + Education + Income + Age + Ethnicity + Race 
++ Gender + Political_Identity, data=survey)
+
+table1(~ Size + Employees, data=survey)
+
+survey %>% 
+  dplyr::select(Size, Employees, Role, Years, Education, Income, Age, Ethnicity, Race, Gender, Political_Identity, Industry) %>%
+  tbl_summary(
+    statistic = list(all_continuous()  ~ "{mean} ({sd})",
+                     all_categorical() ~ "{n}    ({p}%)"),
+    digits = list(all_continuous()  ~ c(2, 2),
+                  all_categorical() ~ c(0, 1)),
+    type = list(Size ~ "categorical",
+                Employees ~ "categorical",
+                Role ~ "categorical",
+                Years ~ "categorical",
+                Education ~ "categorical",
+                Income ~ "categorical",
+                Age ~ "categorical",
+                Ethnicity ~ "categorical",
+                Race ~ "categorical",
+                Gender ~ "categorical",
+                Political_Identity ~ "continuous",
+                Industry ~ "categorical"),
+    label  = list(Size ~ "Firm Size",
+                Employees ~ "Employees at Firm",
+                Role ~ "Company Role",
+                Years ~ "Years at Company",
+                Education ~ "Education Level",
+                Income ~ "Annual Income",
+                Age ~ "Age",
+                Ethnicity ~ "Ethnicity",
+                Race ~ "Race",
+                Gender ~ "Gender",
+                Political_Identity ~ "Political Identity",
+                Industry ~ "Industry")
+  ) %>%
+  modify_header(
+    label = "**Variable**",
+    all_stat_cols() ~ "**{level}**<br>N = {n} ({style_percent(p, digits=1)}%)"
+  ) %>%
+  modify_caption("Participant characteristics") %>%
+  bold_labels() %>%
+  as_gt() %>%
+  gt::gtsave(
+    filename = "demo_table.docx"
+  )
+
+TABLE1
+
+summary(as.factor(survey$Size))
+
+### Size bar plot
+f.1.1 <- ggplot(data=survey, aes(x=Employees)) +
+  geom_bar(stat="count", fill="maroon")+
+  scale_x_discrete(labels=c("1 to 4", "5 to 9","10 to 19", "20 to 49", "50 to 99", "100 to 249", "250 to 499", "500 to 999", "1,000 or more")) +
+  ylab("Count") +
+  xlab("Employees at Firm") + 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        text = element_text(family = "Times New Roman"),
+        axis.text=element_text(size=9))
+  
+  
+f.1.2 <- ggplot(data=survey, aes(x=Size)) +
+  geom_bar(stat="count", fill="maroon")+
+  scale_x_discrete(labels=c("Freelancer","Micro", "Small-Medium", "Large Private", "Publicly Traded", "State-Owned")) +
+  ylab("Count") +
+  xlab("Self-Identified Firm Size") + 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        text = element_text(family = "Times New Roman"),
+        axis.text=element_text(size=9))
+
+  f.1.2
+  f.1.1
+  
+ggsave("figure2_1.png", plot = f.1.1)
+ggsave("figure2_2.png", plot = f.1.2)
+
+  
+jpeg("Size_Demo.jpg", width = 1000, height = "1000")
+plot(survey$Employees, col = "maroon", cex.axis = .75,
+     main = "Employee Count Firm Size Demographic Distribution", xlab="Employee Number", ylab = "Count",
+     names.arg=c("1 to 4", "5 to 9","10 to 19", "20 to 49", "50 to 99", "100 to 249", "250 to 499", "500 to 999", "1,000 or more"))
+dev.off()
+```

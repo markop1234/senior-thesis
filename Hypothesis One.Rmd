@@ -1,0 +1,309 @@
+---
+title: "Hypothesis 1"
+output: html_notebook
+---
+
+1: Load packages
+```{r}
+library(tidyverse)
+library(lme4)
+library(sjPlot)
+library(car)
+library(ltm)
+```
+
+2: Recode data
+```{r}
+survey <- survey %>%
+  mutate(EP_1 = replace(EP_1, EP_1 == "I never perceive", 1), 
+         EP_1 = replace(EP_1, EP_1 == "I rarely perceive", 2),
+         EP_1 = replace(EP_1, EP_1 == "I sometimes perceive", 3),
+         EP_1 = replace(EP_1, EP_1 == "I often perceive", 4),
+         EP_1 = replace(EP_1, EP_1 == "I always perceive", 5)) %>%
+  mutate(EP_2 = replace(EP_2, EP_2 == "I never perceive", 1), 
+         EP_2 = replace(EP_2, EP_2 == "I rarely perceive", 2),
+         EP_2 = replace(EP_2, EP_2 == "I sometimes perceive", 3),
+         EP_2 = replace(EP_2, EP_2 == "I often perceive", 4),
+         EP_2 = replace(EP_2, EP_2 == "I always perceive", 5)) %>%
+  mutate(EP_3 = replace(EP_3, EP_3 == "I never perceive", 1), 
+         EP_3 = replace(EP_3, EP_3 == "I rarely perceive", 2),
+         EP_3 = replace(EP_3, EP_3 == "I sometimes perceive", 3),
+         EP_3 = replace(EP_3, EP_3 == "I often perceive", 4),
+         EP_3 = replace(EP_3, EP_3 == "I always perceive", 5)) %>%
+  mutate(EP_4 = replace(EP_4, EP_4 == "I never perceive", 1), 
+         EP_4 = replace(EP_4, EP_4 == "I rarely perceive", 2),
+         EP_4 = replace(EP_4, EP_4 == "I sometimes perceive", 3),
+         EP_4 = replace(EP_4, EP_4 == "I often perceive", 4),
+         EP_4 = replace(EP_4, EP_4 == "I always perceive", 5)) %>%
+  mutate(EP_5 = replace(EP_5, EP_5 == "I never perceive", 1), 
+         EP_5 = replace(EP_5, EP_5 == "I rarely perceive", 2),
+         EP_5 = replace(EP_5, EP_5 == "I sometimes perceive", 3),
+         EP_5 = replace(EP_5, EP_5 == "I often perceive", 4),
+         EP_5 = replace(EP_5, EP_5 == "I always perceive", 5)) %>%
+  mutate(SP_1 = replace(SP_1, SP_1 == "I never perceive", 1), 
+         SP_1 = replace(SP_1, SP_1 == "I rarely perceive", 2),
+         SP_1 = replace(SP_1, SP_1 == "I sometimes perceive", 3),
+         SP_1 = replace(SP_1, SP_1 == "I often perceive", 4),
+         SP_1 = replace(SP_1, SP_1 == "I always perceive", 5)) %>%
+  mutate(SP_2 = replace(SP_2, SP_2 == "I never perceive", 1), 
+         SP_2 = replace(SP_2, SP_2 == "I rarely perceive", 2),
+         SP_2 = replace(SP_2, SP_2 == "I sometimes perceive", 3),
+         SP_2 = replace(SP_2, SP_2 == "I often perceive", 4),
+         SP_2 = replace(SP_2, SP_2 == "I always perceive", 5)) %>%
+  mutate(SP_3 = replace(SP_3, SP_3 == "I never perceive", 1), 
+         SP_3 = replace(SP_3, SP_3 == "I rarely perceive", 2),
+         SP_3 = replace(SP_3, SP_3 == "I sometimes perceive", 3),
+         SP_3 = replace(SP_3, SP_3 == "I often perceive", 4),
+         SP_3 = replace(SP_3, SP_3 == "I always perceive", 5)) %>%
+  mutate(SP_4 = replace(SP_4, SP_4 == "I never perceive", 1), 
+         SP_4 = replace(SP_4, SP_4 == "I rarely perceive", 2),
+         SP_4 = replace(SP_4, SP_4 == "I sometimes perceive", 3),
+         SP_4 = replace(SP_4, SP_4 == "I often perceive", 4),
+         SP_4 = replace(SP_4, SP_4 == "I always perceive", 5)) %>%
+  mutate(SP_5 = replace(SP_5, SP_5 == "I never perceive", 1), 
+         SP_5 = replace(SP_5, SP_5 == "I rarely perceive", 2),
+         SP_5 = replace(SP_5, SP_5 == "I sometimes perceive", 3),
+         SP_5 = replace(SP_5, SP_5 == "I often perceive", 4),
+         SP_5 = replace(SP_5, SP_5 == "I always perceive", 5)) %>%
+  mutate(GP_1 = replace(GP_1, GP_1 == "I never perceive", 1), 
+         GP_1 = replace(GP_1, GP_1 == "I rarely perceive", 2),
+         GP_1 = replace(GP_1, GP_1 == "I sometimes perceive", 3),
+         GP_1 = replace(GP_1, GP_1 == "I often perceive", 4),
+         GP_1 = replace(GP_1, GP_1 == "I always perceive", 5)) %>%
+  mutate(GP_2 = replace(GP_2, GP_2 == "I never perceive", 1), 
+         GP_2 = replace(GP_2, GP_2 == "I rarely perceive", 2),
+         GP_2 = replace(GP_2, GP_2 == "I sometimes perceive", 3),
+         GP_2 = replace(GP_2, GP_2 == "I often perceive", 4),
+         GP_2 = replace(GP_2, GP_2 == "I always perceive", 5)) %>%
+  mutate(GP_3 = replace(GP_3, GP_3 == "I never perceive", 1), 
+         GP_3 = replace(GP_3, GP_3 == "I rarely perceive", 2),
+         GP_3 = replace(GP_3, GP_3 == "I sometimes perceive", 3),
+         GP_3 = replace(GP_3, GP_3 == "I often perceive", 4),
+         GP_3 = replace(GP_3, GP_3 == "I always perceive", 5)) %>%
+  mutate(GP_4 = replace(GP_4, GP_4 == "I never perceive", 1), 
+         GP_4 = replace(GP_4, GP_4 == "I rarely perceive", 2),
+         GP_4 = replace(GP_4, GP_4 == "I sometimes perceive", 3),
+         GP_4 = replace(GP_4, GP_4 == "I often perceive", 4),
+         GP_4 = replace(GP_4, GP_4 == "I always perceive", 5)) %>%
+  mutate(GP_5 = replace(GP_5, GP_5 == "I never perceive", 1), 
+         GP_5 = replace(GP_5, GP_5 == "I rarely perceive", 2),
+         GP_5 = replace(GP_5, GP_5 == "I sometimes perceive", 3),
+         GP_5 = replace(GP_5, GP_5 == "I often perceive", 4),
+         GP_5 = replace(GP_5, GP_5 == "I always perceive", 5)) %>%
+  mutate(EPF = replace(EPF, EPF == "Strongly Disagree", 1), 
+         EPF = replace(EPF, EPF == "Somewhat disagree", 2),
+         EPF = replace(EPF, EPF == "Neither agree nor disagree", 3),
+         EPF = replace(EPF, EPF == "Somewhat agree", 4),
+         EPF = replace(EPF, EPF == "Strongly agree", 5)) %>%
+  mutate(SPF = replace(SPF, SPF == "Strongly Disagree", 1), 
+         SPF = replace(SPF, SPF == "Somewhat disagree", 2),
+         SPF = replace(SPF, SPF == "Neither agree nor disagree", 3),
+         SPF = replace(SPF, SPF == "Somewhat agree", 4),
+         SPF = replace(SPF, SPF == "Strongly agree", 5)) %>%
+  mutate(GPF = replace(GPF, GPF == "Strongly Disagree", 1), 
+         GPF = replace(GPF, GPF == "Somewhat disagree", 2),
+         GPF = replace(GPF, GPF == "Neither agree nor disagree", 3),
+         GPF = replace(GPF, GPF == "Somewhat agree", 4),
+         GPF = replace(GPF, GPF == "Strongly agree", 5))
+```
+
+3: Scale the data
+```{r}
+survey$EP_1_z <- scale(as.numeric(survey$EP_1))
+survey$EP_2_z <- scale(as.numeric(survey$EP_2))
+survey$EP_3_z <- scale(as.numeric(survey$EP_3))
+survey$EP_4_z <- scale(as.numeric(survey$EP_4))
+survey$EP_5_z <- scale(as.numeric(survey$EP_5))
+survey$SP_1_z <- scale(as.numeric(survey$SP_1))
+survey$SP_2_z <- scale(as.numeric(survey$SP_2))
+survey$SP_3_z <- scale(as.numeric(survey$SP_3))
+survey$SP_4_z <- scale(as.numeric(survey$SP_4))
+survey$SP_5_z <- scale(as.numeric(survey$SP_5))
+survey$GP_1_z <- scale(as.numeric(survey$GP_1))
+survey$GP_2_z <- scale(as.numeric(survey$GP_2))
+survey$GP_3_z <- scale(as.numeric(survey$GP_3))
+survey$GP_4_z <- scale(as.numeric(survey$GP_4))
+survey$GP_5_z <- scale(as.numeric(survey$GP_5))
+survey$EPF_z <- scale(as.numeric(survey$EPF))
+survey$SPF_z <- scale(as.numeric(survey$SPF))
+survey$GPF_z <- scale(as.numeric(survey$GPF))
+
+survey$EP_1 <- as.numeric(survey$EP_1)
+survey$EP_2 <- as.numeric(survey$EP_2)
+survey$EP_3 <- as.numeric(survey$EP_3)
+survey$EP_4 <- as.numeric(survey$EP_4)
+survey$EP_5 <- as.numeric(survey$EP_5)
+survey$SP_1 <- as.numeric(survey$SP_1)
+survey$SP_2 <- as.numeric(survey$SP_2)
+survey$SP_3 <- as.numeric(survey$SP_3)
+survey$SP_4 <- as.numeric(survey$SP_4)
+survey$SP_5 <- as.numeric(survey$SP_5)
+survey$GP_1 <- as.numeric(survey$GP_1)
+survey$GP_2 <- as.numeric(survey$GP_2)
+survey$GP_3 <- as.numeric(survey$GP_3)
+survey$GP_4 <- as.numeric(survey$GP_4)
+survey$GP_5 <- as.numeric(survey$GP_5)
+survey$EPF <- as.numeric(survey$EPF)
+survey$SPF <- as.numeric(survey$SPF)
+survey$GPF <- as.numeric(survey$GPF)
+```
+
+4: Create indices
+```{r}
+survey$EP_Index <- rowMeans(survey[, c("EP_1", "EP_2", "EP_3", "EP_4", 
+                                     "EP_5")])
+survey$EP_z_Index <- rowMeans(survey[, c("EP_1_z", "EP_2_z", "EP_3_z", "EP_4_z", 
+                                     "EP_5_z")])
+survey$SP_Index <- rowMeans(survey[ , c("SP_1", "SP_2", "SP_3", "SP_4",
+                                      "SP_5")])
+survey$SP_z_Index <- rowMeans(survey[ , c("SP_1_z", "SP_2_z", "SP_3_z", "SP_4_z",
+                                      "SP_5_z")])
+survey$GP_Index <- rowMeans(survey[ , c("GP_1", "GP_2", "GP_3", "GP_4",
+                                      "GP_5")])
+survey$GP_z_Index <- rowMeans(survey[ , c("GP_1_z", "GP_2_z", "GP_3_z", "GP_4_z",
+                                      "GP_5_z")])
+survey$ESG_Index <- rowMeans(survey[ , c("SP_1", "SP_2", "SP_3", "SP_4",
+                                      "SP_5", "EP_1", "EP_2", "EP_3", "EP_4", 
+                                     "EP_5", "GP_1", "GP_2", "GP_3", "GP_4",
+                                      "GP_5")])
+survey$ESG_z_Index <- rowMeans(survey[ , c("SP_1_z", "SP_2_z", "SP_3_z", "SP_4_z",
+                                      "SP_5_z", "EP_1_z", "EP_2_z", "EP_3_z", "EP_4_z", 
+                                     "EP_5_z", "GP_1_z", "GP_2_z", "GP_3_z", "GP_4_z",
+                                      "GP_5_z")])
+survey$ESGF <- rowMeans(survey[ , c("EPF", "SPF", "GPF")])
+survey$ESGF_z <- rowMeans(survey[ , c("EPF_z", "SPF_z", "GPF_z")])
+```
+
+5: Averages across indices
+```{r}
+# Selecting green colors
+customGreen0 = "#DeF7E9"
+customGreen = "#71CA97"
+
+# Create TABLE2
+size_order <- c("Sole Proprietorship or Freelancer", "Micro Private Enterprise",
+                "Small-Medium Private Enterprise", "Large Private Enterprise",
+                "Publicly Traded Corporation", "State-Owned Enterprise")
+
+TABLE2 <- survey %>%
+  select(EP_Index, SP_Index, GP_Index, ESG_Index, Size) %>%
+  group_by(Size) %>%
+  summarise(`Environmental Pillar`=mean(EP_Index), `Social Pillar`=mean(SP_Index), `Governmental Pillar`=mean(GP_Index), `ESG Overall`=mean(ESG_Index)) %>%
+  slice(match(size_order, Size))
+
+formattable(TABLE2, list(`Size` = formatter("span", 
+  style = ~ style(color = "grey",font.weight = "bold")), 
+  `EP`= color_tile(customGreen, customGreen0),
+  `SP`= color_tile(customGreen, customGreen0),
+  `GP`= color_tile(customGreen, customGreen0),
+  `ESG`= color_tile(customGreen, customGreen0)
+),
+table.attr = 'style="font-family: Times New Roman";\"')
+
+# Create TABLE3
+summary(as.factor(survey$Employees))
+employee_order <- c("1 to 4 employees", "5 to 9 employees",
+                "10 to 19 employees", "20 to 49 employees",
+                "50 to 99 employees", "100 to 249 employees",
+                "250 to 499 employees", "500 to 999 employees",
+                "1,000 or more employees")
+
+TABLE3 <- survey %>%
+  select(EP_Index, SP_Index, GP_Index, ESG_Index, EPF_z, SPF_z, GPF_z, ESGF, Employees) %>%
+  group_by(Employees) %>%
+  summarise(EP=mean(EP_Index), SP=mean(SP_Index), GP=mean(GP_Index), ESG=mean(ESG_Index)) %>%
+  slice(match(employee_order, Employees))
+
+formattable(TABLE3, list(`Employees` = formatter("span", 
+  style = ~ style(color = "grey",font.weight = "bold")), 
+  `EP`= color_tile(customGreen, customGreen0),
+  `SP`= color_tile(customGreen, customGreen0),
+  `GP`= color_tile(customGreen, customGreen0),
+  `ESG`= color_tile(customGreen, customGreen0)
+),
+table.attr = 'style="font-family: Times New Roman";\"')
+```
+
+6: Recreate using numeric demographics
+```{r}
+survey.num <- survey
+survey.num$Size <- as.numeric(survey.num$Size)
+survey.num$Employees <- as.numeric(survey.num$Employees)
+survey.num$Role <- as.numeric(survey.num$Role)
+survey.num$Years <- as.numeric(survey.num$Years)
+survey.num$Age <- as.numeric(survey.num$Age)
+survey.num$Education <- as.numeric(survey.num$Education)
+survey.num$Income <- as.numeric(survey.num$Income)
+```
+
+7: Scatter plots
+```{r}
+plot(survey.num$Employees, survey.num$ESG_Index)
+plot(survey.num$Size, survey.num$ESG_Index)
+```
+
+8: Correlations
+```{r}
+cor(survey$ESG_Index, survey.num$Employees)
+cor(survey$ESG_Index, survey.num$Size)
+
+cov(survey.num$Size, survey.num$Employees, use = "complete.obs")
+vif(EP)
+
+## Cronbach alpha
+alpha <- tibble(survey$EPF, survey$SPF, survey$GPF)
+cronbach.alpha(alpha, na.rm=TRUE)
+```
+
+9: Regressions
+```{r}
+# Model with 'size'
+EP <- lm(EP_Index ~ Size + Role + Gender + Political_Identity
+         + Years + Education + Income + Age + Race + Ethnicity, data = survey)
+SP <- lm(SP_Index ~ Size + Role + Gender + Political_Identity
+         + Years + Education + Income + Age + Race + Ethnicity, data = survey)
+GP <- lm(GP_Index ~ Size + Role + Gender + Political_Identity
+         + Years + Education + Income + Age + Race + Ethnicity, data = survey)
+ESG <- lm(ESG_Index ~ Size + Role + Gender + Political_Identity
+         + Years + Education + Income + Age + Race + Ethnicity, data = survey)
+tab_model(ESG, EP, SP, GP, 
+          title = "TABLE 2: Regression of perceived ESG indices by self-identified firm size",
+          file = "table_2.doc")
+
+# Check race
+summary(as.factor(survey$Race))
+survey <- survey %>% 
+          mutate(Race = factor(Race, levels =  c("American Indian/Native American or Alaska Native", "Asian", "Black or African American", "Native Hawaiian or Other Pacific Islander", "White or Caucasian", "More than one race", "Other", "Prefer not to say")))
+
+# Check gender
+summary(as.factor(survey$Gender))
+survey <- survey %>% 
+          mutate(Gender = factor(Gender, levels =  c("Non-binary / third gender", "Male", "Female")))
+
+## REFERENCE RACE: American Indian/Native American or Alaska Native
+## REFERENCE GENDER: Non-binary / third gender
+
+# Model with 'employees'
+EP.e <- lm(EP_Index ~ Employees + Role + Gender + Political_Identity
+         + Years + Education + Income + Age + Race + Ethnicity, data = survey)
+SP.e <- lm(SP_Index ~ Employees + Role + Gender + Political_Identity
+         + Years + Education + Income + Age + Race + Ethnicity, data = survey)
+GP.e <- lm(GP_Index ~ Employees + Role + Gender + Political_Identity
+         + Years + Education + Income + Age + Race + Ethnicity, data = survey)
+ESG.e <- lm(ESG_Index ~ Employees + Role + Gender + Political_Identity
+         + Years + Education + Income + Age + Race + Ethnicity, data = survey)
+tab_model(ESG.e, EP.e, SP.e, GP.e,
+          title = "TABLE 3: Regression of perceived ESG indices by employee count",
+          file = "table_3.doc")
+
+# Treat as numeric
+EP.n <- lm(EP_Index ~ Size + Role + Gender + Political_Identity
+         + Years + Education + Income + Age + Race + Ethnicity, data = survey.num)
+SP.n <- lm(SP_Index ~ Size + Role + Gender + Political_Identity
+         + Years + Education + Income + Age + Race + Ethnicity, data = survey.num)
+GP.n <- lm(GP_Index ~ Size + Role + Gender + Political_Identity
+         + Years + Education + Income + Age + Race + Ethnicity, data = survey.num)
+ESG.n <- lm(ESG_Index ~ Size + Role + Gender + Political_Identity
+         + Years + Education + Income + Age + Race + Ethnicity, data = survey.num)
+tab_model(ESG.n, EP.n, SP.n, GP.n)
+```
